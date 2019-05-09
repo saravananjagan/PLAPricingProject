@@ -1,0 +1,13 @@
+D:\PMS_V2\AuthenticationLearning_WithoutWebApi\PMSIDAL\bin\Debug\PMSIDAL.exe.config
+D:\PMS_V2\AuthenticationLearning_WithoutWebApi\PMSIDAL\bin\Debug\PMSIDAL.exe
+D:\PMS_V2\AuthenticationLearning_WithoutWebApi\PMSIDAL\bin\Debug\PMSIDAL.pdb
+D:\PMS_V2\AuthenticationLearning_WithoutWebApi\PMSIDAL\obj\Debug\PMSIDAL.csprojAssemblyReference.cache
+D:\PMS_V2\AuthenticationLearning_WithoutWebApi\PMSIDAL\obj\Debug\PMSIDAL.csproj.CoreCompileInputs.cache
+D:\PMS_V2\AuthenticationLearning_WithoutWebApi\PMSIDAL\obj\Debug\PMSIDAL.exe
+D:\PMS_V2\AuthenticationLearning_WithoutWebApi\PMSIDAL\obj\Debug\PMSIDAL.pdb
+D:\PMS_V2\AuthenticationLearning_WithoutWebApi\PMSIDAL\bin\Debug\LinqToExcel.dll
+D:\PMS_V2\AuthenticationLearning_WithoutWebApi\PMSIDAL\bin\Debug\Remotion.Data.Linq.dll
+D:\PMS_V2\AuthenticationLearning_WithoutWebApi\PMSIDAL\bin\Debug\Remotion.dll
+D:\PMS_V2\AuthenticationLearning_WithoutWebApi\PMSIDAL\bin\Debug\Remotion.Interfaces.dll
+D:\PMS_V2\AuthenticationLearning_WithoutWebApi\PMSIDAL\bin\Debug\LinqToExcel.xml
+D:\PMS_V2\AuthenticationLearning_WithoutWebApi\PMSIDAL\obj\Debug\PMSIDAL.csproj.CopyComplete

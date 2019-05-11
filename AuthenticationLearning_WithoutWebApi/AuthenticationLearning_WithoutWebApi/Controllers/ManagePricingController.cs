@@ -18,8 +18,11 @@ namespace AuthenticationLearning_WithoutWebApi.Controllers
         // GET: ManagePricing
         public ActionResult Index()
         {
-
-            return View();
+            DataSet PricingDataSet = new DataSet();
+            DataTable PricingDataTable = new DataTable();
+            PricingDataSet =PricingDetailsProxy.FetchPricingDetails();
+            PricingDataTable = PricingDataSet.Tables[0];
+            return View(PricingDataTable);
         }
 
         [HttpPost]

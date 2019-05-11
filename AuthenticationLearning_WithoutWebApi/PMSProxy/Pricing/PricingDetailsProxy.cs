@@ -2,6 +2,7 @@
 using PMSService.Pricing;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,6 +15,11 @@ namespace PMSProxy.Pricing
         {
             IPricingDetailsService pricingDetailsService = new PricingDetailsService();
             return pricingDetailsService.InsertBulkPricingDetails(ImportValues);
+        }
+        public static DataSet FetchPricingDetails()
+        {
+            IPricingDetailsService pricingDetailsService = new PricingDetailsService();
+            return pricingDetailsService.FetchPricingDetails();
         }
     }
 }

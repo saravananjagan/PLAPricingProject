@@ -3,6 +3,7 @@ using PMSDAL.Pricing;
 using PMSIDAL.Pricing;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,6 +24,21 @@ namespace PMSService.Pricing
 
             }
             return true;
+        }
+
+        public DataSet FetchPricingDetails()
+        {
+            DataSet dataSet = new DataSet();
+            try
+            {
+                IPricingDetailsDAL pricingDetailsDAL = new PricingDetailsDAL();
+                dataSet = pricingDetailsDAL.FetchPricingDetails(); 
+            }
+            catch (Exception e)
+            {
+
+            }
+            return dataSet;
         }
     }
 }

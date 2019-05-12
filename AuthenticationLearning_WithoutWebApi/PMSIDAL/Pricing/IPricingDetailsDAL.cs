@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PMSModel.Pricing;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -11,5 +12,6 @@ namespace PMSIDAL.Pricing
     {
         bool InsertBulkPricingDetails(string ImportValues);
         DataSet FetchPricingDetails();
+        bool CUDPricingDetails(PricingData pricingData, string QuerySelector);
     }
 }

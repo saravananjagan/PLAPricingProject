@@ -1,12 +1,29 @@
 ﻿@using System.Data;
+@using AuthenticationLearning_WithoutWebApi.Constants;
 @{
     ViewBag.Title = "Index";
     DataTable PricingDataTable = Model;
 }
+
 <div class="container-fluid">
     <h4>Add Pricing via Excel</h4>
     <hr />
-    @using (Html.BeginForm("UploadPricing", "ManagePricing", FormMethod.Post, new { enctype = "multipart/form-data", onsubmit = "return myFunction()" }))
+    @if (TempData.ContainsKey(UploadConstants.UploadError) && !String.IsNullOrEmpty(TempData[UploadConstants.UploadError].ToString()))
+    {
+        <div class="alert alert-danger">
+            <button type="button" class="close" data-dismiss="alert">×</button>
+            <strong>Please correct the following errors:</strong> <br />
+            <div id="ErrorMessage">@TempData[UploadConstants.UploadError].ToString()</div>
+        </div>
+    }
+    @if (TempData.ContainsKey(UploadConstants.UploadSuccess) && !String.IsNullOrEmpty(TempData[UploadConstants.UploadSuccess].ToString()))
+    {
+        <div class="alert alert-success">
+            <button type="button" class="close" data-dismiss="alert">×</button>
+            <strong id="SuccessMessage">@TempData[UploadConstants.UploadSuccess].ToString()</strong>
+        </div>
+    }
+    @using (Html.BeginForm("UploadPricingDetails", "ManagePricing", FormMethod.Post, new { enctype = "multipart/form-data", onsubmit = "return myFunction()" }))
     {
         <div class="form-horizontal">
             <div class="form-group">
@@ -27,13 +44,89 @@
 
 </div>
 <div class="container-fluid">
-    <table class="table table-striped">
-        <thead><tr><th>Col 1</th><th>Col 2</th><th>Col 3</th></tr></thead>
+    <table class="table table-striped datatable">
+        <thead><tr><th>Product Id</th><th>Product Name</th><th>Buy Price</th><th>Sell Price</th><th>Profit</th><th>MRP</th><th>Actions</th></tr></thead>
         <tbody>
             @foreach (DataRow row in PricingDataTable.Rows)
             {
-
+                <tr>
+                    <td>@row["ProductId"].ToString()</td>
+                    <td>@row["ProductName"].ToString()</td>
+                    <td>@row["BuyPrice"].ToString()</td>
+                    <td>@row["SellPrice"].ToString()</td>
+                    <td>@row["Profit"].ToString()</td>
+                    <td>@row["MRP"].ToString()</td>
+                    <td><a href="#" onclick="UpdatePricingModal('@row["ProductPricingId"]','@row["ProductId"]','@row["ProductName"]','@row["BuyPrice"]','@row["SellPrice"]','@row["Profit"]','@row["MRP"]')"><i class="fa fa-pencil"></i></a>&emsp;<a href="#" onclick="DeletePricing('@row["ProductPricingId"]')"><i class="fa fa-trash-o"></i></a></td>
+                </tr>
             }
         </tbody>
     </table>
 </div>
+
+<div id="UpdatePricingModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="myModalLabel">Update Pricing</h3>
+                @*<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>*@
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    Product Id :&nbsp;<input type="text" class="form-control form-control-sm" id="ProductId" placeholder="Product Id">
+                    Product Name :&nbsp;<input type="text" class="form-control form-control-sm" id="ProductName" placeholder="Product Name">
+                    Buy Price :&nbsp;<input type="text" class="form-control form-control-sm" id="BuyPrice" placeholder="Buy Price">
+                    Sell Price :&nbsp;<input type="text" class="form-control form-control-sm" id="SellPrice" placeholder="Sell Price">
+                    Profit :&nbsp;<input type="text" class="form-control form-control-sm" id="Profit" placeholder="Profit">
+                    MRP :&nbsp;<input type="text" class="form-control form-control-sm" id="MRP" placeholder="MRP">
+                    <input type="hidden" id="ProductPricingId" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel/Close</button>
+                <button class="btn btn-primary" onclick="UpdatePricingDetails()">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="temp_element" style="display:none;">
+
+</div>
+
+<script>
+        function UpdatePricingModal(ProductPricingId, ProductId, ProductName, BuyPrice, SellPrice, Profit, MRP) {
+            $("#ProductPricingId").val(ProductPricingId);
+            $("#ProductId").val(ProductId);
+            $("#ProductName").val(ProductName);
+            $("#BuyPrice").val(BuyPrice);
+            $("#SellPrice").val(SellPrice);
+            $("#Profit").val(Profit);
+            $("#MRP").val(MRP);
+            $("#UpdatePricingModal").modal();
+        }
+        function UpdatePricingDetails() {
+            var PricingDetailsModel = {
+                ProductPricingId:$("#ProductPricingId").val(),
+                ProductId:$("#ProductId").val(),
+                ProductName:$("#ProductName").val(),
+                BuyPrice:$("#BuyPrice").val(),
+                SellPrice:$("#SellPrice").val(),
+                Profit:$("#Profit").val(),
+                MRP:$("#MRP").val()
+            }
+            $.ajax({
+                url:'@Url.Action("UpdatePricingDetails","ManagePricing")',
+                type: 'POST',
+                data: PricingDetailsModel,
+                success: function (data) {
+                    $("#temp_element").html(data);
+                    var SuccessMessage = $("#SuccessMessage").html();
+                    var ErrorMessage = $("#ErrorMessage").html();
+                    window.location.href = "@Url.Action("Index","ManagePricing")?SuccessMessages=" + SuccessMessage + "&ErrorMessage=" + ErrorMessage;
+                },
+                error: function (e) {
+                    alert("Something wrong. Please check the internet connection!!!");
+                }
+            });
+
+        }
+</script>

@@ -74,6 +74,10 @@
       <Project>{93D8F74A-44E1-47C3-BC8C-D67442CA728E}</Project>
       <Name>PMSIDAL</Name>
     </ProjectReference>
+    <ProjectReference Include="..\PMSModel\PMSModel.csproj">
+      <Project>{e32d94c3-d690-4696-ba8a-ebd5fdf22140}</Project>
+      <Name>PMSModel</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

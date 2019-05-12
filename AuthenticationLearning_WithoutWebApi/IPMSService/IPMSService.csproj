@@ -65,5 +65,11 @@
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\PMSModel\PMSModel.csproj">
+      <Project>{e32d94c3-d690-4696-ba8a-ebd5fdf22140}</Project>
+      <Name>PMSModel</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

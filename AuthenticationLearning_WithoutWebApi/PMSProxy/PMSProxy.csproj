@@ -70,6 +70,10 @@
       <Project>{3D44E71D-3D44-40D1-AE5A-B04341FE6DFC}</Project>
       <Name>IPMSService</Name>
     </ProjectReference>
+    <ProjectReference Include="..\PMSModel\PMSModel.csproj">
+      <Project>{e32d94c3-d690-4696-ba8a-ebd5fdf22140}</Project>
+      <Name>PMSModel</Name>
+    </ProjectReference>
     <ProjectReference Include="..\PMSService\PMSService.csproj">
       <Project>{43C8841D-10B5-476B-87ED-DA291AADE5B7}</Project>
       <Name>PMSService</Name>

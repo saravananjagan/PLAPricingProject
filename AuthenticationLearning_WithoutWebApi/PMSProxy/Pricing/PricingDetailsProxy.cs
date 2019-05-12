@@ -1,4 +1,5 @@
 ﻿using IPMSService.Pricing;
+using PMSModel.Pricing;
 using PMSService.Pricing;
 using System;
 using System.Collections.Generic;
@@ -20,6 +21,11 @@ namespace PMSProxy.Pricing
         {
             IPricingDetailsService pricingDetailsService = new PricingDetailsService();
             return pricingDetailsService.FetchPricingDetails();
+        }
+        public static bool CUDPricingDetails(PricingData pricingData, string QuerySelector)
+        {
+            IPricingDetailsService pricingDetailsService = new PricingDetailsService();
+            return pricingDetailsService.CUDPricingDetails(pricingData,QuerySelector);
         }
     }
 }

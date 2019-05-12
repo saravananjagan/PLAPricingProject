@@ -1,6 +1,7 @@
 ﻿using IPMSService.Pricing;
 using PMSDAL.Pricing;
 using PMSIDAL.Pricing;
+using PMSModel.Pricing;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -39,6 +40,20 @@ namespace PMSService.Pricing
 
             }
             return dataSet;
+        }
+        public bool CUDPricingDetails(PricingData pricingData,string QuerySelector)
+        {
+            try
+            {
+                IPricingDetailsDAL pricingDetailsDAL = new PricingDetailsDAL();
+                pricingDetailsDAL.CUDPricingDetails(pricingData,QuerySelector);
+                return true;
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
+            
         }
     }
 }

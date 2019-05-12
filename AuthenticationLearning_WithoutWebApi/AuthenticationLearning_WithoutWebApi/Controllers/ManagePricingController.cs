@@ -1,5 +1,9 @@
-﻿using AuthenticationLearning_WithoutWebApi.Models;
+﻿using AuthenticationLearning_WithoutWebApi.Constants;
+using AuthenticationLearning_WithoutWebApi.Models;
 using LinqToExcel;
+using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.EntityFramework;
+using PMSModel.Pricing;
 using PMSProxy.Pricing;
 using System;
 using System.Collections.Generic;
@@ -16,13 +20,155 @@ namespace AuthenticationLearning_WithoutWebApi.Controllers
     public class ManagePricingController : Controller
     {
         // GET: ManagePricing
-        public ActionResult Index()
+        private ApplicationDbContext context;
+        public ManagePricingController()
         {
-            DataSet PricingDataSet = new DataSet();
-            DataTable PricingDataTable = new DataTable();
-            PricingDataSet =PricingDetailsProxy.FetchPricingDetails();
-            PricingDataTable = PricingDataSet.Tables[0];
-            return View(PricingDataTable);
+            context = new ApplicationDbContext();
+        }
+        public ActionResult Index(string ErrorMessages, string SuccessMessages)
+        {
+            if (User.Identity.IsAuthenticated)
+            {
+                if (isAdminUser())
+                {
+                    DataSet PricingDataSet = new DataSet();
+                    DataTable PricingDataTable = new DataTable();
+                    PricingDataSet = PricingDetailsProxy.FetchPricingDetails();
+                    PricingDataTable = PricingDataSet.Tables[0];
+                    if (SuccessMessages!=null && !String.IsNullOrEmpty(SuccessMessages.ToString()))
+                    {
+                        TempData[UploadConstants.UploadSuccess] = SuccessMessages.ToString();
+                    }
+                    if (ErrorMessages!=null&&!String.IsNullOrEmpty(ErrorMessages.ToString()))
+                    {
+                        TempData[UploadConstants.UploadError] = ErrorMessages.ToString();
+                    }
+                    return View(PricingDataTable);                    
+                }
+                else
+                {
+                    return RedirectToAction("Index", "Home");
+                }
+            }
+            else
+            {
+                return RedirectToAction("Index", "Home");
+            }
+            
+        }
+
+        [HttpPost]
+        public ActionResult UploadPricingDetails(PricingList pricingList, HttpPostedFileBase FileUpload)
+        {
+            if (User.Identity.IsAuthenticated)
+            {
+                if (isAdminUser())
+                {
+                    StringBuilder ErrorMessages = new StringBuilder();
+                    StringBuilder SuccessMessages = null;
+                    if (FileUpload != null)
+                    {
+                        if (FileUpload.ContentType == "application/vnd.ms-excel" || FileUpload.ContentType == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                        {
+                            string filename = FileUpload.FileName;
+                            string targetpath = Server.MapPath("~/Doc/");
+                            FileUpload.SaveAs(targetpath + filename);
+                            string pathToExcelFile = targetpath + filename;
+                            var connectionString = "";
+                            if (filename.EndsWith(".xls"))
+                            {
+                                connectionString = string.Format("Provider=Microsoft.Jet.OLEDB.4.0; data source={0}; Extended Properties=Excel 8.0;", pathToExcelFile);
+                            }
+                            else if (filename.EndsWith(".xlsx"))
+                            {
+                                connectionString = string.Format("Provider=Microsoft.ACE.OLEDB.12.0;Data Source={0};Extended Properties=\"Excel 12.0 Xml;HDR=YES;IMEX=1\";", pathToExcelFile);
+                            }
+
+                            var adapter = new OleDbDataAdapter("SELECT * FROM [Sheet1$]", connectionString);
+                            var ds = new DataSet();
+
+                            adapter.Fill(ds, "ExcelTable");
+
+                            DataTable dtable = ds.Tables["ExcelTable"];
+
+                            string sheetName = "Sheet1";
+
+                            var excelFile = new ExcelQueryFactory(pathToExcelFile);
+                            var pricingLists = from a in excelFile.Worksheet<PricingList>(sheetName) select a;
+                            StringBuilder ImportValues = new StringBuilder();
+
+                            foreach (var a in pricingLists)
+                            {
+                                try
+                                {
+                                    if (a.ProductId != "")
+                                    {
+                                        PricingList PL = new PricingList();
+                                        PL.ProductId = a.ProductId;
+                                        PL.ProductName = a.ProductName;
+                                        PL.BuyPrice = a.BuyPrice;
+                                        PL.SellPrice = a.SellPrice;
+                                        PL.Profit = a.Profit;
+                                        PL.MRP = a.MRP;
+                                        string value = "('" + Guid.NewGuid() + "','" + PL.ProductId + "','" + PL.ProductName + "','" + PL.BuyPrice + "','" + PL.SellPrice + "','" + PL.Profit + "','" + PL.MRP + "',1,getdate(),suser_sname(),null,null),";
+                                        ImportValues.Append(value);
+                                    }
+                                }
+
+                                catch (DbEntityValidationException ex)
+                                {
+                                    foreach (var entityValidationErrors in ex.EntityValidationErrors)
+                                    {
+
+                                        foreach (var validationError in entityValidationErrors.ValidationErrors)
+                                        {
+
+                                            ErrorMessages.Append("\nProperty: " + validationError.PropertyName + " Error: " + validationError.ErrorMessage);
+
+                                        }
+
+                                    }
+                                }
+                            }
+                            //deleting excel file from folder  
+                            if ((System.IO.File.Exists(pathToExcelFile)))
+                            {
+                                System.IO.File.Delete(pathToExcelFile);
+                            }
+                            string ImportData = ImportValues.ToString();
+                            ImportData = ImportData.Substring(0, ImportData.Length - 1);
+                            PricingDetailsProxy.InsertBulkPricingDetails(ImportData);
+                            SuccessMessages = new StringBuilder();
+                            SuccessMessages.Append(UploadConstants.UploadSuccessMessage);
+                        }
+                        else
+                        {
+                            ErrorMessages.Append(UploadConstants.InvalidFileFormat);
+                        }
+                    }
+                    else
+                    {
+                        ErrorMessages.Append(UploadConstants.FileNotFound);   
+                    }
+                    if (!String.IsNullOrEmpty(SuccessMessages.ToString()))
+                    {
+                        TempData[UploadConstants.UploadSuccess] = SuccessMessages.ToString();
+                    }
+                    if (!String.IsNullOrEmpty(ErrorMessages.ToString()))
+                    {
+                        TempData[UploadConstants.UploadError] = ErrorMessages.ToString();
+                    }                    
+                    return RedirectToAction("Index","ManagePricing");
+                }
+                else
+                {
+                    return RedirectToAction("Index", "Home");
+                }
+            }
+            else
+            {
+                return RedirectToAction("Index", "Home");
+            }
         }
 
         [HttpPost]
@@ -125,114 +271,71 @@ namespace AuthenticationLearning_WithoutWebApi.Controllers
 
         }
 
-
         [HttpPost]
-        public ActionResult ImportPricingDetails(PricingList pricingList, HttpPostedFileBase FileUpload)
+        public ActionResult UpdatePricingDetails(PricingData pricingData)
         {
-            List<string> data = new List<string>();
-            if (FileUpload != null)
+            if (User.Identity.IsAuthenticated)
             {
-                // tdata.ExecuteCommand("truncate table OtherCompanyAssets");  
-                if (FileUpload.ContentType == "application/vnd.ms-excel" || FileUpload.ContentType == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                if (isAdminUser())
                 {
-
-                    string filename = FileUpload.FileName;
-                    string targetpath = Server.MapPath("~/Doc/");
-                    FileUpload.SaveAs(targetpath + filename);
-                    string pathToExcelFile = targetpath + filename;
-                    var connectionString = "";
-                    if (filename.EndsWith(".xls"))
+                    StringBuilder ErrorMessages = new StringBuilder();
+                    StringBuilder SuccessMessages = new StringBuilder();
+                    try
                     {
-                        connectionString = string.Format("Provider=Microsoft.Jet.OLEDB.4.0; data source={0}; Extended Properties=Excel 8.0;", pathToExcelFile);
-                    }
-                    else if (filename.EndsWith(".xlsx"))
-                    {
-                        connectionString = string.Format("Provider=Microsoft.ACE.OLEDB.12.0;Data Source={0};Extended Properties=\"Excel 12.0 Xml;HDR=YES;IMEX=1\";", pathToExcelFile);
-                    }
-
-                    var adapter = new OleDbDataAdapter("SELECT * FROM [Sheet1$]", connectionString);
-                    var ds = new DataSet();
-
-                    adapter.Fill(ds, "ExcelTable");
-
-                    DataTable dtable = ds.Tables["ExcelTable"];
-
-                    string sheetName = "Sheet1";
-
-                    var excelFile = new ExcelQueryFactory(pathToExcelFile);
-                    var pricingLists = from a in excelFile.Worksheet<PricingList>(sheetName) select a;
-                    StringBuilder ImportValues = new StringBuilder();
-
-                    foreach (var a in pricingLists)
-                    {
-                        try
+                        bool UpdateResult = false;
+                        UpdateResult=PricingDetailsProxy.CUDPricingDetails(pricingData,"Update");
+                        if (UpdateResult == false)
                         {
-                            //if (a.ProductName != "" && a.ProductPrice != "")
-                            //{
-                            //    PricingList PL = new PricingList();
-                            //    PL.ProductName = a.ProductName;
-                            //    PL.ProductPrice = a.ProductPrice;
-                            //    PL.ProductDescription = a.ProductDescription;
-                            //    string value = "('"+PL.ProductName+"','"+PL.ProductPrice+"','"+PL.ProductDescription+"'),";
-                            //    ImportValues.Append(value);
-                            //}
-                            //else
-                            //{
-                            //    data.Add("<ul>");
-                            //    if (a.ProductName == "" || a.ProductName == null) data.Add("<li> name is required</li>");
-                            //    if (a.ProductPrice == "" || a.ProductPrice == null) data.Add("<li> ProductPrice is required</li>");                                
-
-                            //    data.Add("</ul>");
-                            //    data.ToArray();
-                            //    return Json(data, JsonRequestBehavior.AllowGet);
-                            //}
-
+                            ErrorMessages.Append(CUDConstants.UpdateError);
                         }
-
-                        catch (DbEntityValidationException ex)
+                        else
                         {
-                            foreach (var entityValidationErrors in ex.EntityValidationErrors)
-                            {
-
-                                foreach (var validationError in entityValidationErrors.ValidationErrors)
-                                {
-
-                                    Response.Write("Property: " + validationError.PropertyName + " Error: " + validationError.ErrorMessage);
-
-                                }
-
-                            }
+                            SuccessMessages.Append(CUDConstants.UpdateSuccess);
                         }
                     }
-                    //deleting excel file from folder  
-                    if ((System.IO.File.Exists(pathToExcelFile)))
+                    catch(Exception e)
                     {
-                        System.IO.File.Delete(pathToExcelFile);
+                        ErrorMessages.Append(CUDConstants.UpdateError);
                     }
-                    string ImportData = ImportValues.ToString();
-                    ImportData = ImportData.Substring(0, ImportData.Length - 1);
-                    PricingDetailsProxy.InsertBulkPricingDetails(ImportData);
-                    return Json("success", JsonRequestBehavior.AllowGet);
+                    if (!String.IsNullOrEmpty(SuccessMessages.ToString()))
+                    {
+                        TempData[UploadConstants.UploadSuccess] = SuccessMessages.ToString();
+                    }
+                    if (!String.IsNullOrEmpty(ErrorMessages.ToString()))
+                    {
+                        TempData[UploadConstants.UploadError] = ErrorMessages.ToString();
+                    }
+                    return RedirectToAction("Index", "ManagePricing");
                 }
                 else
                 {
-                    //alert message for invalid file format  
-                    data.Add("<ul>");
-                    data.Add("<li>Only Excel file format is allowed</li>");
-                    data.Add("</ul>");
-                    data.ToArray();
-                    return Json(data, JsonRequestBehavior.AllowGet);
+                    return RedirectToAction("Index", "Home");
                 }
             }
             else
             {
-                data.Add("<ul>");
-                if (FileUpload == null) data.Add("<li>Please choose Excel file</li>");
-                data.Add("</ul>");
-                data.ToArray();
-                return Json(data, JsonRequestBehavior.AllowGet);
+                return RedirectToAction("Index", "Home");
             }
+        }
 
+        private Boolean isAdminUser()
+        {
+            if (User.Identity.IsAuthenticated)
+            {
+                var user = User.Identity;
+                ApplicationDbContext context = new ApplicationDbContext();
+                var UserManager = new UserManager<ApplicationUser>(new UserStore<ApplicationUser>(context));
+                var s = UserManager.GetRoles(user.GetUserId());
+                if (s[0].ToString() == "Admin")
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            return false;
         }
     }       
 }

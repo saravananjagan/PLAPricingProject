@@ -40,19 +40,11 @@ namespace AuthenticationLearning_WithoutWebApi
                 }
 
             }
-            if (!roleManager.RoleExists("Head Master"))
+
+            if (!roleManager.RoleExists("Champion"))
             {
                 var role = new IdentityRole();
-                role.Name = "Head Master";
-                roleManager.Create(role);
-
-            }
-
-
-            if (!roleManager.RoleExists("Teacher"))
-            {
-                var role = new IdentityRole();
-                role.Name = "Teacher";
+                role.Name = "Champion";
                 roleManager.Create(role);
 
             }

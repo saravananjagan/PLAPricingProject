@@ -51,6 +51,10 @@ namespace AuthenticationLearning_WithoutWebApi.Controllers
                         MenuDOM.Append("<li><a href=\"" + menuRow["ModuleURL"] + "\">" + menuRow["ModuleDisplayName"] + "</a>");
                     }
                 }
+                if (isAdminUser())
+                {
+                    MenuDOM.Append("<li><a href=\"/Account/Register\" id=\"registerLink\">Register</a></li>");
+                }
                 return MenuDOM.ToString();
             }
             else

@@ -192,6 +192,7 @@
     <Compile Include="Controllers\ManageController.cs" />
     <Compile Include="Controllers\ManagePricingController.cs" />
     <Compile Include="Controllers\RolesController.cs" />
+    <Compile Include="Controllers\SalesController.cs" />
     <Compile Include="Controllers\UserController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -200,6 +201,7 @@
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\DataTableModel.cs" />
     <Compile Include="Models\IdentityModels.cs" />
+    <Compile Include="Models\ManagePricing_IndexViewModel.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
     <Compile Include="Models\PricingList.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -266,6 +268,9 @@
     <Content Include="Views\Roles\Create.cshtml" />
     <Content Include="Views\Shared\_SideNavPartial.cshtml" />
     <Content Include="Views\ManagePricing\Index.cshtml" />
+    <Content Include="Views\ManagePricing\PricingDataTable.cshtml" />
+    <Content Include="Views\Sales\Index.cshtml" />
+    <Content Include="Views\Sales\ChampionsPricingGrid.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

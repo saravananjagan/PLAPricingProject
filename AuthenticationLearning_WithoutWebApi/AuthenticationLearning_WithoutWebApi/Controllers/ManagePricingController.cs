@@ -21,11 +21,13 @@ namespace AuthenticationLearning_WithoutWebApi.Controllers
     {
         // GET: ManagePricing
         private ApplicationDbContext context;
+        private ManagePricing_IndexViewModel managePricing_IndexViewModel;
         public ManagePricingController()
         {
             context = new ApplicationDbContext();
+            managePricing_IndexViewModel = new ManagePricing_IndexViewModel();
         }
-        public ActionResult Index(string ErrorMessages, string SuccessMessages)
+        public ActionResult Index(ManagePricing_IndexViewModel managePricing_IndexViewModel)
         {
             if (User.Identity.IsAuthenticated)
             {
@@ -35,15 +37,11 @@ namespace AuthenticationLearning_WithoutWebApi.Controllers
                     DataTable PricingDataTable = new DataTable();
                     PricingDataSet = PricingDetailsProxy.FetchPricingDetails();
                     PricingDataTable = PricingDataSet.Tables[0];
-                    if (SuccessMessages!=null && !String.IsNullOrEmpty(SuccessMessages.ToString()))
+                    if (PricingDataTable != null)
                     {
-                        TempData[UploadConstants.UploadSuccess] = SuccessMessages.ToString();
+                        managePricing_IndexViewModel.PricingDataTable = PricingDataTable;
                     }
-                    if (ErrorMessages!=null&&!String.IsNullOrEmpty(ErrorMessages.ToString()))
-                    {
-                        TempData[UploadConstants.UploadError] = ErrorMessages.ToString();
-                    }
-                    return View(PricingDataTable);                    
+                    return View(managePricing_IndexViewModel);                    
                 }
                 else
                 {
@@ -284,6 +282,11 @@ namespace AuthenticationLearning_WithoutWebApi.Controllers
                     {
                         bool UpdateResult = false;
                         UpdateResult=PricingDetailsProxy.CUDPricingDetails(pricingData,"Update");
+                        DataSet PricingDataSet = new DataSet();
+                        DataTable PricingDataTable = new DataTable();
+                        PricingDataSet = PricingDetailsProxy.FetchPricingDetails();
+                        PricingDataTable = PricingDataSet.Tables[0];
+                        managePricing_IndexViewModel.PricingDataTable = PricingDataTable;
                         if (UpdateResult == false)
                         {
                             ErrorMessages.Append(CUDConstants.UpdateError);
@@ -299,13 +302,130 @@ namespace AuthenticationLearning_WithoutWebApi.Controllers
                     }
                     if (!String.IsNullOrEmpty(SuccessMessages.ToString()))
                     {
-                        TempData[UploadConstants.UploadSuccess] = SuccessMessages.ToString();
+                        managePricing_IndexViewModel.SuccessMessage = SuccessMessages.ToString();
                     }
                     if (!String.IsNullOrEmpty(ErrorMessages.ToString()))
                     {
-                        TempData[UploadConstants.UploadError] = ErrorMessages.ToString();
+                        managePricing_IndexViewModel.ErrorMessage = ErrorMessages.ToString();
                     }
-                    return RedirectToAction("Index", "ManagePricing");
+
+                    return PartialView("PricingDataTable", managePricing_IndexViewModel);
+                }
+                else
+                {
+                    return RedirectToAction("Index", "Home");
+                }
+            }
+            else
+            {
+                return RedirectToAction("Index", "Home");
+            }
+        }
+
+        [HttpPost]
+        public ActionResult AddPricingDetails(PricingData pricingData)
+        {
+            if (User.Identity.IsAuthenticated)
+            {
+                if (isAdminUser())
+                {
+                    StringBuilder ErrorMessages = new StringBuilder();
+                    StringBuilder SuccessMessages = new StringBuilder();
+                    try
+                    {
+                        bool InsertResult = false;
+                        pricingData.ProductPricingId = Guid.NewGuid().ToString();
+                        InsertResult = PricingDetailsProxy.CUDPricingDetails(pricingData, "Insert");
+                        DataSet PricingDataSet = new DataSet();
+                        DataTable PricingDataTable = new DataTable();
+                        PricingDataSet = PricingDetailsProxy.FetchPricingDetails();
+                        PricingDataTable = PricingDataSet.Tables[0];
+                        managePricing_IndexViewModel.PricingDataTable = PricingDataTable;
+                        if (InsertResult == false)
+                        {
+                            ErrorMessages.Append(CUDConstants.InsertError);
+                        }
+                        else
+                        {
+                            SuccessMessages.Append(CUDConstants.InsertSuccess);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        ErrorMessages.Append(CUDConstants.InsertError);
+                    }
+                    if (!String.IsNullOrEmpty(SuccessMessages.ToString()))
+                    {
+                        managePricing_IndexViewModel.SuccessMessage = SuccessMessages.ToString();
+                    }
+                    if (!String.IsNullOrEmpty(ErrorMessages.ToString()))
+                    {
+                        managePricing_IndexViewModel.ErrorMessage = ErrorMessages.ToString();
+                    }
+                    return PartialView("PricingDataTable", managePricing_IndexViewModel);
+                }
+                else
+                {
+                    return RedirectToAction("Index", "Home");
+                }
+            }
+            else
+            {
+                return RedirectToAction("Index", "Home");
+            }
+        }
+
+        [HttpPost]
+        public ActionResult DeletePricingDetails(string ProductPricingId)
+        {
+            if (User.Identity.IsAuthenticated)
+            {
+                if (isAdminUser())
+                {
+                    StringBuilder ErrorMessages = new StringBuilder();
+                    StringBuilder SuccessMessages = new StringBuilder();
+                    try
+                    {
+                        PricingData pricingData = new PricingData();
+                        if (!string.IsNullOrEmpty(ProductPricingId))
+                        {
+                            pricingData.ProductPricingId = ProductPricingId;
+                            bool InsertResult = false;
+                            InsertResult = PricingDetailsProxy.CUDPricingDetails(pricingData, "Delete");
+                            DataSet PricingDataSet = new DataSet();
+                            DataTable PricingDataTable = new DataTable();
+                            PricingDataSet = PricingDetailsProxy.FetchPricingDetails();
+                            PricingDataTable = PricingDataSet.Tables[0];
+                            managePricing_IndexViewModel.PricingDataTable = PricingDataTable;
+                            if (InsertResult == false)
+                            {
+                                ErrorMessages.Append(CUDConstants.DeleteError);
+                            }
+                            else
+                            {
+                                SuccessMessages.Append(CUDConstants.DeleteSuccess);
+                            }
+                        }
+                        else
+                        {
+                            ErrorMessages.Append(CUDConstants.DeleteError);
+                        }
+
+                    }
+                    catch (Exception e)
+                    {
+                        ErrorMessages.Append(CUDConstants.DeleteError);
+                    }
+                    if (!String.IsNullOrEmpty(SuccessMessages.ToString()))
+                    {
+                        managePricing_IndexViewModel.SuccessMessage = SuccessMessages.ToString();
+                    }
+                    if (!String.IsNullOrEmpty(ErrorMessages.ToString()))
+                    {
+                        managePricing_IndexViewModel.ErrorMessage = ErrorMessages.ToString();
+                    }
+                    
+                    return PartialView("PricingDataTable", managePricing_IndexViewModel);
                 }
                 else
                 {

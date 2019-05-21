@@ -11,5 +11,6 @@ namespace AuthenticationLearning_WithoutWebApi.Models
         public string SuccessMessage { get; set; }
         public string ErrorMessage { get; set; }
         public DataTable PricingDataTable { get; set; }
+        public string UserId { get; set; }
     }
 }

@@ -57,6 +57,7 @@
   <ItemGroup>
     <Compile Include="FetchMetadata\IModuleDisplayDetailsDAL.cs" />
     <Compile Include="FetchMetadata\ITenantDetailsDAL.cs" />
+    <Compile Include="Order\ICartDetailsDAL.cs" />
     <Compile Include="Pricing\IPricingDetailsDAL.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

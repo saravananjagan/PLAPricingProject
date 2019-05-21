@@ -2,6 +2,7 @@
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using PMSProxy.FetchMetadata;
+using PMSProxy.Order;
 using System;
 using System.Data;
 using System.Text;
@@ -55,6 +56,12 @@ namespace AuthenticationLearning_WithoutWebApi.Controllers
                 {
                     MenuDOM.Append("<li><a href=\"/Account/Register\" id=\"registerLink\">Register</a></li>");
                 }
+                if (isValidUser())
+                {
+                    DataSet cartDetails = CartDetailsProxy.FetchCartDetails(User.Identity.GetUserId(),null, "CartDetail");
+                    string count = cartDetails.Tables[0].Rows.Count.ToString();
+                    MenuDOM.Append("<li><a href=\"#\" id=\"Cart\" onclick=\"ViewCart()\"><i class=\"fa fa-shopping-cart\"></i>&nbsp;Items(" + count + ")</a></li>");
+                }
                 return MenuDOM.ToString();
             }
             else
@@ -72,6 +79,26 @@ namespace AuthenticationLearning_WithoutWebApi.Controllers
                 var UserManager = new UserManager<ApplicationUser>(new UserStore<ApplicationUser>(context));
                 var s = UserManager.GetRoles(user.GetUserId());
                 if (s[0].ToString() == "Admin")
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            return false;
+        }
+
+        private Boolean isValidUser()
+        {
+            if (User.Identity.IsAuthenticated)
+            {
+                var user = User.Identity;
+                ApplicationDbContext context = new ApplicationDbContext();
+                var UserManager = new UserManager<ApplicationUser>(new UserStore<ApplicationUser>(context));
+                var s = UserManager.GetRoles(user.GetUserId());
+                if (s[0].ToString() == "Champion")
                 {
                     return true;
                 }

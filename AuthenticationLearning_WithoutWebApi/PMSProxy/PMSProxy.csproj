@@ -57,6 +57,7 @@
   <ItemGroup>
     <Compile Include="FetchMetadata\ModuleDisplayDetailsProxy.cs" />
     <Compile Include="FetchMetadata\TenantDetailsProxy.cs" />
+    <Compile Include="Order\CartDetailsProxy.cs" />
     <Compile Include="Pricing\PricingDetailsProxy.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

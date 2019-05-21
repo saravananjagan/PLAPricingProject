@@ -57,6 +57,7 @@
   <ItemGroup>
     <Compile Include="FetchMetadata\ModuleDisplayDetailsService.cs" />
     <Compile Include="FetchMetadata\TenantDetailsService.cs" />
+    <Compile Include="Order\CartDetailsService.cs" />
     <Compile Include="Pricing\PricingDetailsService.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

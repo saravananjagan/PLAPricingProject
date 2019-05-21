@@ -52,8 +52,7 @@ namespace PMSService.Pricing
             catch (Exception e)
             {
                 return false;
-            }
-            
+            }            
         }
     }
 }
